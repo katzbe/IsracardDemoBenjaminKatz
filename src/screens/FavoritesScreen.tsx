@@ -1,15 +1,21 @@
 import { StyleSheet, View } from 'react-native';
 import { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useQuery } from '@tanstack/react-query';
 
 import BooksList from '../components/BooksList';
-import mockBooks from '../data/books';
 import AsyncStorageService from '../services/AsyncStorageService';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { Book } from '../types';
-import { useFocusEffect } from '@react-navigation/native';
+import { fetchBooks } from '../lib/api';
 
 export default function FavoritesScreen() {
-  const [books, setBooks] = useState<Book[]>([]);
+  const [favouriteBooks, setFavouriteBooks] = useState<Book[]>([]);
+
+  const { data: books } = useQuery({
+    queryKey: ['books'],
+    queryFn: fetchBooks,
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -19,18 +25,18 @@ export default function FavoritesScreen() {
             STORAGE_KEYS.FAVORITE_BOOKS,
           )) ?? [];
 
-        const favouriteBooksToDisplay = mockBooks.filter(book =>
-          storedFavoriteBookIds.includes(book.number),
-        );
+        const favouriteBooksToDisplay =
+          books?.filter(book => storedFavoriteBookIds?.includes(book.number)) ??
+          [];
 
-        setBooks(favouriteBooksToDisplay);
+        setFavouriteBooks(favouriteBooksToDisplay);
       })();
-    }, []),
+    }, [books]),
   );
 
   return (
     <View style={styles.container}>
-      <BooksList books={books} />
+      <BooksList books={favouriteBooks} />
     </View>
   );
 }
