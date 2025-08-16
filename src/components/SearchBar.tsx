@@ -33,6 +33,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     boxShadow: '2px 4px 16px rgba(0,0,0,0.1)',
   },
-  inputContainer: { flexDirection: 'row', gap: 10 },
+  inputContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
   input: { flex: 1, fontSize: 16, color: '#333' },
 });

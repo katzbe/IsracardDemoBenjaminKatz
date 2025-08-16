@@ -4,6 +4,8 @@ import {
   StaticParamList,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Ionicons from '@react-native-vector-icons/ionicons';
+
 import HomeScreen from '../screens/HomeScreen';
 import BookDetailsScreen from '../screens/BookDetailsScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
@@ -13,8 +15,34 @@ const HomeTabs = createBottomTabNavigator({
     headerShadowVisible: false,
   },
   screens: {
-    Home: HomeScreen,
-    Favorites: FavoritesScreen,
+    Home: {
+      options: {
+        tabBarIcon: ({ focused, color, size }) => (
+          <Ionicons
+            name={focused ? 'home' : 'home-outline'}
+            size={size}
+            color={color}
+          />
+        ),
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray',
+      },
+      screen: HomeScreen,
+    },
+    Favorites: {
+      options: {
+        tabBarIcon: ({ focused, color, size }) => (
+          <Ionicons
+            name={focused ? 'heart' : 'heart-outline'}
+            size={size}
+            color={color}
+          />
+        ),
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray',
+      },
+      screen: FavoritesScreen,
+    },
   },
 });
 
