@@ -1,4 +1,6 @@
 import { DefaultTheme } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import Navigation from './src/navigation/RootNavigator';
 
 const MyTheme = {
@@ -9,6 +11,12 @@ const MyTheme = {
   },
 };
 
+const queryClient = new QueryClient();
+
 export default function App() {
-  return <Navigation theme={MyTheme} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Navigation theme={MyTheme} />
+    </QueryClientProvider>
+  );
 }
