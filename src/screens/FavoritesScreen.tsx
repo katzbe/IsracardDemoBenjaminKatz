@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 
@@ -8,14 +8,25 @@ import AsyncStorageService from '../services/AsyncStorageService';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { Book } from '../types';
 import { fetchBooks } from '../lib/api';
+import SearchBar from '../components/SearchBar';
 
 export default function FavoritesScreen() {
-  const [favouriteBooks, setFavouriteBooks] = useState<Book[]>([]);
-
   const { data: books } = useQuery({
     queryKey: ['books'],
     queryFn: fetchBooks,
   });
+
+  const [favouriteBooks, setFavouriteBooks] = useState<Book[]>([]);
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [query]);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,9 +45,14 @@ export default function FavoritesScreen() {
     }, [books]),
   );
 
+  const filteredBooks = favouriteBooks.filter(book =>
+    book.title.toLowerCase().includes(debouncedQuery.toLowerCase()),
+  );
+
   return (
     <View style={styles.container}>
-      <BooksList books={favouriteBooks} />
+      <SearchBar value={query} onChange={setQuery} />
+      <BooksList books={filteredBooks} />
     </View>
   );
 }

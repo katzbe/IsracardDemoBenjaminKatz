@@ -9,18 +9,19 @@ import BookDetailsScreen from '../screens/BookDetailsScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 
 const HomeTabs = createBottomTabNavigator({
+  screenOptions: {
+    headerShadowVisible: false,
+  },
   screens: {
-    Home: {
-      options: {
-        headerTitle: 'Home',
-      },
-      screen: HomeScreen,
-    },
+    Home: HomeScreen,
     Favorites: FavoritesScreen,
   },
 });
 
 const RootStack = createNativeStackNavigator({
+  screenOptions: {
+    headerShadowVisible: false,
+  },
   screens: {
     Tabs: {
       options: {
@@ -29,6 +30,9 @@ const RootStack = createNativeStackNavigator({
       screen: HomeTabs,
     },
     BookDetails: {
+      options: {
+        headerTitle: 'Book Details',
+      },
       screen: BookDetailsScreen,
     },
   },
