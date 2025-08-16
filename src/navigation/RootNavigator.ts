@@ -6,21 +6,28 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import BookDetailsScreen from '../screens/BookDetailsScreen';
-import FavouritesScreen from '../screens/FavouritesScreen';
+import FavoritesScreen from '../screens/FavoritesScreen';
 
 const HomeTabs = createBottomTabNavigator({
-  screenOptions: {
-    headerShown: false,
-  },
   screens: {
-    Home: HomeScreen,
-    Favourites: FavouritesScreen,
+    Home: {
+      options: {
+        headerTitle: 'Home',
+      },
+      screen: HomeScreen,
+    },
+    Favorites: FavoritesScreen,
   },
 });
 
 const RootStack = createNativeStackNavigator({
   screens: {
-    Home: HomeTabs,
+    Tabs: {
+      options: {
+        headerShown: false,
+      },
+      screen: HomeTabs,
+    },
     BookDetails: {
       screen: BookDetailsScreen,
     },
@@ -28,12 +35,6 @@ const RootStack = createNativeStackNavigator({
 });
 
 const Navigation = createStaticNavigation(RootStack);
-
-// type BottomTabParamList = StaticParamList<typeof BottomTabNavigator>;
-// type ProfileScreenNavigationProp = BottomTabNavigationProp<
-//   BottomTabParamList,
-//   'Profile'
-// >;
 
 type RootStackParamList = StaticParamList<typeof RootStack>;
 
