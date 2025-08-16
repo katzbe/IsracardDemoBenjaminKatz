@@ -1,6 +1,6 @@
+import { useEffect, useState } from 'react';
 import { StaticScreenProps } from '@react-navigation/native';
 import {
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 
 import { Book } from '../types';
 import AsyncStorageService from '../services/AsyncStorageService';
@@ -20,37 +21,42 @@ type Props = StaticScreenProps<{
 export default function BookDetailsScreen({ route }: Props) {
   const { book } = route.params;
 
-  async function onAddFavoritePress() {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  async function onFavoritePress() {
     const storedFavoriteBookIds =
       (await AsyncStorageService.getItem<number[]>(
         STORAGE_KEYS.FAVORITE_BOOKS,
       )) ?? [];
     if (storedFavoriteBookIds.includes(book.number)) {
+      await AsyncStorageService.setItem(
+        STORAGE_KEYS.FAVORITE_BOOKS,
+        storedFavoriteBookIds.filter(bookId => bookId !== book.number),
+      );
+      setIsFavorite(false);
       return;
     }
     await AsyncStorageService.setItem(STORAGE_KEYS.FAVORITE_BOOKS, [
       ...storedFavoriteBookIds,
       book.number,
     ]);
-
-    Alert.alert('Book was successfully added to your favourites!');
+    setIsFavorite(true);
   }
 
-  async function onRemoveFavoritesPress() {
-    const storedFavoriteBookIds =
-      (await AsyncStorageService.getItem<number[]>(
-        STORAGE_KEYS.FAVORITE_BOOKS,
-      )) ?? [];
-    const newFavoriteBookIds = storedFavoriteBookIds.filter(
-      bookId => bookId !== book.number,
-    );
-    await AsyncStorageService.setItem(
-      STORAGE_KEYS.FAVORITE_BOOKS,
-      newFavoriteBookIds,
-    );
+  useEffect(() => {
+    (async () => {
+      const storedFavoriteBookIds =
+        (await AsyncStorageService.getItem<number[]>(
+          STORAGE_KEYS.FAVORITE_BOOKS,
+        )) ?? [];
 
-    Alert.alert('Book was successfully removed from your favourites!');
-  }
+      const isFavoriteBook = !!storedFavoriteBookIds.find(
+        bookId => bookId === book.number,
+      );
+
+      setIsFavorite(isFavoriteBook);
+    })();
+  }, [book]);
 
   return (
     <ScrollView style={styles.container}>
@@ -68,14 +74,13 @@ export default function BookDetailsScreen({ route }: Props) {
           </Text>
           <Text>Released on {book.releaseDate}</Text>
           <Text>Total pages: {book.pages}</Text>
-          <View style={{ marginTop: 'auto' }}>
-            <Pressable onPress={onAddFavoritePress}>
-              <Text>Add to favourite</Text>
-            </Pressable>
-            <Pressable onPress={onRemoveFavoritesPress}>
-              <Text>Remove from favourites</Text>
-            </Pressable>
-          </View>
+          <Pressable style={styles.favouriteButton} onPress={onFavoritePress}>
+            <Ionicons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={36}
+              color="#900"
+            />
+          </Pressable>
         </View>
       </View>
       <Text style={styles.descriptionText}>{book.description}</Text>
