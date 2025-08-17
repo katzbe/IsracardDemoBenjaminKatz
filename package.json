@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-vector-icons/ionicons": "^12.3.0",
     "@react-native/new-app-screen": "0.81.0",
@@ -20,8 +21,11 @@
     "axios": "^1.11.0",
     "react": "19.1.0",
     "react-native": "0.81.0",
+    "react-native-gesture-handler": "^2.28.0",
+    "react-native-reanimated": "^4.0.2",
     "react-native-safe-area-context": "^5.6.0",
-    "react-native-screens": "^4.14.1"
+    "react-native-screens": "^4.14.1",
+    "react-native-worklets": "^0.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

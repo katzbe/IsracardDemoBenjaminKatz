@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 
@@ -8,7 +8,18 @@ import AsyncStorageService from '../services/AsyncStorageService';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { Book } from '../types';
 import { fetchBooks } from '../lib/api';
-import SearchBar from '../components/SearchBar';
+import BooksToolbar from '../components/BooksToolbar';
+import OrderByBottomSheet from '../components/OrderByBottomSheet';
+import type BottomSheet from '@gorhom/bottom-sheet';
+
+const ORDER_BY_OPTIONS = [
+  { title: 'Title ↑', value: 'title-asc' },
+  { title: 'Title ↓', value: 'title-desc' },
+  { title: 'Pages ↑', value: 'pages-asc' },
+  { title: 'Pages ↓', value: 'pages-desc' },
+  { title: 'Release date ↑', value: 'release-date-asc' },
+  { title: 'Release date ↓', value: 'release-date-desc' },
+];
 
 export default function FavoritesScreen() {
   const { data: books } = useQuery({
@@ -16,9 +27,14 @@ export default function FavoritesScreen() {
     queryFn: fetchBooks,
   });
 
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
   const [favouriteBooks, setFavouriteBooks] = useState<Book[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [selectedOrderByValue, setSelectedOrderByValue] = useState(
+    ORDER_BY_OPTIONS[0],
+  );
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -45,14 +61,27 @@ export default function FavoritesScreen() {
     }, [books]),
   );
 
-  const filteredBooks = favouriteBooks.filter(book =>
-    book.title.toLowerCase().includes(debouncedQuery.toLowerCase()),
+  const filteredBooks = favouriteBooks.filter(
+    book =>
+      book.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      book.description.toLowerCase().includes(debouncedQuery.toLowerCase()),
   );
 
   return (
     <View style={styles.container}>
-      <SearchBar value={query} onChange={setQuery} />
+      <BooksToolbar
+        searchQuery={query}
+        onQueryChange={setQuery}
+        onOrderByPress={() => bottomSheetRef.current?.expand()}
+        orderedBy={selectedOrderByValue.title}
+      />
       <BooksList books={filteredBooks} />
+      <OrderByBottomSheet
+        ref={bottomSheetRef}
+        onSelect={setSelectedOrderByValue}
+        options={ORDER_BY_OPTIONS}
+        selectedValue={selectedOrderByValue}
+      />
     </View>
   );
 }

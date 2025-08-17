@@ -1,5 +1,6 @@
 import { DefaultTheme } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import Navigation from './src/navigation/RootNavigator';
 
@@ -16,7 +17,9 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Navigation theme={MyTheme} />
+      <GestureHandlerRootView>
+        <Navigation theme={MyTheme} />
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }
