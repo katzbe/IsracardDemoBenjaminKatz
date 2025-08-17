@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type BottomSheet from '@gorhom/bottom-sheet';
 
 import BooksList from '../components/BooksList';
@@ -9,6 +9,8 @@ import { ErrorMessage } from '../components/ErrorMessage';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import OrderByBottomSheet from '../components/OrderByBottomSheet';
 import BooksToolbar from '../components/BooksToolbar';
+import { useSort } from '../hooks/useSort';
+import { toISODate } from '../utils';
 
 const ORDER_BY_OPTIONS = [
   { title: 'Title ↑', value: 'title-asc' },
@@ -44,13 +46,24 @@ export default function HomeScreen() {
     return () => clearTimeout(timeout);
   }, [query]);
 
+  const filteredBooks = useMemo(() => {
+    if (!books) return [];
+    return books.filter(book =>
+      book.title?.toLowerCase?.().includes(debouncedQuery.toLowerCase()),
+    );
+  }, [books, debouncedQuery]);
+
+  const sortedBooks = useSort(filteredBooks, selectedOrderByValue.value, {
+    title: (b: any) => (b.title ?? '').toString(),
+    pages: (b: any) => Number(b.pages ?? 0),
+    'release-date': (b: any) => {
+      return new Date(toISODate(b.releaseDate) ?? '');
+    },
+  });
+
   if (isPending) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={error.message} />;
   if (!books) return null;
-
-  const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(debouncedQuery.toLowerCase()),
-  );
 
   return (
     <View style={styles.container}>
@@ -60,8 +73,8 @@ export default function HomeScreen() {
         onQueryChange={setQuery}
         onOrderByPress={() => bottomSheetRef.current?.expand()}
       />
-      {filteredBooks.length > 0 ? (
-        <BooksList books={filteredBooks} />
+      {sortedBooks.length > 0 ? (
+        <BooksList books={sortedBooks} />
       ) : (
         <Text style={styles.emptyText}>No books found</Text>
       )}

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,6 +11,8 @@ import { fetchBooks } from '../lib/api';
 import BooksToolbar from '../components/BooksToolbar';
 import OrderByBottomSheet from '../components/OrderByBottomSheet';
 import type BottomSheet from '@gorhom/bottom-sheet';
+import { useSort } from '../hooks/useSort';
+import { toISODate } from '../utils';
 
 const ORDER_BY_OPTIONS = [
   { title: 'Title ↑', value: 'title-asc' },
@@ -35,6 +37,21 @@ export default function FavoritesScreen() {
   const [selectedOrderByValue, setSelectedOrderByValue] = useState(
     ORDER_BY_OPTIONS[0],
   );
+
+  const filteredBooks = useMemo(() => {
+    if (!favouriteBooks) return [];
+    return favouriteBooks.filter(book =>
+      book.title?.toLowerCase?.().includes(debouncedQuery.toLowerCase()),
+    );
+  }, [favouriteBooks, debouncedQuery]);
+
+  const sortedBooks = useSort(filteredBooks, selectedOrderByValue.value, {
+    title: (b: any) => (b.title ?? '').toString(),
+    pages: (b: any) => Number(b.pages ?? 0),
+    'release-date': (b: any) => {
+      return new Date(toISODate(b.releaseDate) ?? '');
+    },
+  });
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -61,12 +78,6 @@ export default function FavoritesScreen() {
     }, [books]),
   );
 
-  const filteredBooks = favouriteBooks.filter(
-    book =>
-      book.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-      book.description.toLowerCase().includes(debouncedQuery.toLowerCase()),
-  );
-
   return (
     <View style={styles.container}>
       <BooksToolbar
@@ -75,7 +86,7 @@ export default function FavoritesScreen() {
         onOrderByPress={() => bottomSheetRef.current?.expand()}
         orderedBy={selectedOrderByValue.title}
       />
-      <BooksList books={filteredBooks} />
+      <BooksList books={sortedBooks} />
       <OrderByBottomSheet
         ref={bottomSheetRef}
         onSelect={setSelectedOrderByValue}
